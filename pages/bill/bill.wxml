@@ -1,0 +1,127 @@
+<view class="page">
+
+  <!-- 月份导航 -->
+  <view class="month-nav">
+    <view class="nav-btn" bindtap="prevMonth">‹</view>
+    <view class="month-title">{{ currentYearMonth }}</view>
+    <view class="nav-btn" bindtap="nextMonth">›</view>
+  </view>
+
+  <!-- 日历 -->
+  <view class="calendar-card">
+    <view class="week-header">
+      <view wx:for="{{ weekDays }}" wx:key="index" class="week-label">{{ item }}</view>
+    </view>
+    <view class="calendar-grid">
+      <view
+        wx:for="{{ calendarDays }}" wx:key="index"
+        class="{{ item.cellClass }}"
+        bindtap="onDayTap"
+        data-day="{{ item }}"
+      >
+        <text class="{{ item.numClass }}">{{ item.day }}</text>
+        <view wx:if="{{ item.hasCost }}" class="{{ item.dotClass }}"></view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 月度汇总 -->
+  <view class="card">
+    <view class="section-title">📊 {{ currentYearMonth }} 月度汇总</view>
+    <view wx:if="{{ loadingMonthly }}" class="tip">加载中…</view>
+    <view wx:elif="{{ monthlySummary.length === 0 }}" class="tip">本月暂无已结算数据</view>
+    <block wx:else>
+      <view class="total-row">
+        <text class="total-label">{{ currentYearMonth }}合计</text>
+        <text class="total-amount">¥ {{ monthlyTotal }}</text>
+      </view>
+      <view wx:for="{{ monthlySummary }}" wx:key="name" class="summary-row">
+        <view class="avatar">{{ item.name[0] }}</view>
+        <text class="summary-name">{{ item.name }}</text>
+        <text class="summary-val">¥ {{ item.total }}</text>
+      </view>
+    </block>
+  </view>
+
+</view>
+
+<!-- 遮罩 -->
+<view wx:if="{{ showDetail }}" class="mask" bindtap="closeDetail"></view>
+
+<!-- 日明细弹窗 -->
+<view wx:if="{{ showDetail }}" class="sheet">
+  <view class="sheet-bar"></view>
+
+  <view class="sheet-head">
+    <view class="sheet-date-tag">{{ selectedDate }}</view>
+    <view class="sheet-close" bindtap="closeDetail">✕</view>
+  </view>
+
+  <!-- ① 缺席时长（可编辑） -->
+  <view class="inner-card">
+    <view class="section-title">🚪 缺席时长</view>
+    <view wx:if="{{ loadingDay }}" class="tip">加载中…</view>
+    <block wx:else>
+      <view wx:for="{{ dayRecords }}" wx:key="name" class="slider-block">
+        <view class="slider-row">
+          <view class="avatar sm">{{ item.name[0] }}</view>
+          <text class="slider-name">{{ item.name }}</text>
+          <text class="slider-hours">{{ item.absentHours }}h 外出</text>
+        </view>
+        <slider
+          value="{{ item.absentHours }}"
+          min="0" max="24" step="0.5"
+          activeColor="#07c160"
+          backgroundColor="#e5e5e5"
+          block-color="#07c160"
+          data-index="{{ index }}"
+          bindchange="onAbsentChange"
+        />
+      </view>
+      <view class="action-btn ghost" bindtap="saveAbsent">
+        {{ savingAbsent ? '保存中…' : '💾 保存缺席记录' }}
+      </view>
+    </block>
+  </view>
+
+  <!-- ② 用电度数输入 -->
+  <view class="inner-card">
+    <view class="section-title">⚡ 当天用电度数</view>
+    <view class="kwh-row">
+      <input
+        class="kwh-input"
+        type="digit"
+        placeholder="输入度数，如 21.47"
+        value="{{ kWh }}"
+        bindinput="onKwhInput"
+      />
+      <text class="kwh-unit">度</text>
+    </view>
+    <view wx:if="{{ totalCost > 0 }}" class="cost-hint">
+      {{ kWh }} 度 ÷ 1.48 = <text class="cost-green">¥ {{ totalCost }}</text>
+    </view>
+  </view>
+
+  <!-- ③ 计算按钮 -->
+  <view class="action-btn primary {{ calculating ? 'btn-dis' : '' }}" bindtap="calculateDaily">
+    {{ calculating ? '计算中…' : '⚡ 计算分摊金额' }}
+  </view>
+
+  <!-- ④ 分摊结果 -->
+  <view wx:if="{{ results.length > 0 }}" class="inner-card result-card">
+    <view class="section-title">💰 分摊结果</view>
+    <view wx:for="{{ results }}" wx:key="name" class="result-row">
+      <view class="avatar sm">{{ item.name[0] }}</view>
+      <view class="result-info">
+        <text class="result-name">{{ item.name }}</text>
+        <text class="result-sub">在宿 {{ item.presentHours }}h · 外出 {{ item.absentHours }}h</text>
+      </view>
+      <text class="result-amt">¥ {{ item.amount }}</text>
+    </view>
+    <view class="result-total-row">
+      <text class="result-total-lbl">当日合计</text>
+      <text class="result-total-val">¥ {{ resultTotal }}</text>
+    </view>
+  </view>
+
+</view>

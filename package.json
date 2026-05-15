@@ -1,0 +1,7 @@
+{
+  "name": "dorm-electric",
+  "version": "1.0.0",
+  "dependencies": {
+    "@vant/weapp": "^1.11.6"
+  }
+}

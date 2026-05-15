@@ -1,0 +1,31 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/bill/bill"
+  ],
+  "tabBar": {
+    "color": "#999",
+    "selectedColor": "#07c160",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "记账",
+        "iconPath": "icons/tab_record.png",
+        "selectedIconPath": "icons/tab_record_on.png"
+      },
+      {
+        "pagePath": "pages/bill/bill",
+        "text": "账单",
+        "iconPath": "icons/tab_bill.png",
+        "selectedIconPath": "icons/tab_bill_on.png"
+      }
+    ]
+  },
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#07c160",
+    "navigationBarTitleText": "电费管家",
+    "navigationBarTextStyle": "white"
+  },
+  "usingComponents": {}
+}

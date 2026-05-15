@@ -1,0 +1,127 @@
+<view class="page">
+
+  <!-- 头部日期 -->
+  <view class="header">
+    <text class="header-date">{{ today }}</text>
+    <text class="header-sub">今日缺席记录</text>
+  </view>
+
+  <!-- 选择舍友 -->
+  <view class="card">
+    <view class="field-label">选择舍友</view>
+    <picker mode="selector" range="{{ roommates }}" value="{{ selectedIndex }}" bindchange="onPickerChange">
+      <view class="picker-row">
+        <text class="picker-val">{{ selectedName || '请选择舍友' }}</text>
+        <text class="picker-arrow">›</text>
+      </view>
+    </picker>
+  </view>
+
+  <!-- 缺席时长 slider -->
+  <view class="card">
+    <view class="field-label">
+      <text>不在宿舍时长</text>
+      <text class="hours-badge">{{ absentHours }}h</text>
+    </view>
+    <slider
+      value="{{ absentHours }}"
+      min="0" max="24" step="0.5"
+      show-value
+      activeColor="#07c160"
+      backgroundColor="#e5e5e5"
+      block-color="#07c160"
+      bindchange="onSliderChange"
+    />
+    <view class="slider-tips">
+      <text>0h（全天在宿）</text>
+      <text>24h（全天外出）</text>
+    </view>
+  </view>
+
+  <!-- 提交按钮 -->
+  <view class="submit-btn {{ submitting ? 'btn-disabled' : '' }}" bindtap="submitRecord">
+    <text>{{ submitting ? '记录中…' : '✅ 确认记账' }}</text>
+  </view>
+
+  <!-- 今日已录记录 -->
+  <view wx:if="{{ recentList.length > 0 }}" class="card">
+    <view class="field-label">今日已录记录</view>
+    <view wx:for="{{ recentList }}" wx:key="_id" class="record-row">
+      <view class="avatar">{{ item.name[0] }}</view>
+      <view class="record-info">
+        <text class="record-name">{{ item.name }}</text>
+        <text class="record-sub">缺席 {{ item.absentHours }}h · 在宿 {{ 24 - item.absentHours }}h</text>
+      </view>
+      <view class="record-cost {{ item.cost > 0 ? 'cost-ok' : 'cost-pending' }}">
+        {{ item.cost > 0 ? '¥' + item.cost : '待结算' }}
+      </view>
+    </view>
+  </view>
+
+  <view wx:else class="empty-tip">今日暂无记录，开始记账吧 👆</view>
+
+
+  <!-- 区间用电统计 -->
+  <view class="card range-card">
+    <view class="field-label">📅 区间用电统计</view>
+
+    <view class="range-row">
+      <view class="range-item">
+        <text class="range-label">开始日期</text>
+        <picker mode="date" value="{{ rangeStart }}" bindchange="onRangeStartChange">
+          <view class="range-picker {{ rangeStart ? 'filled' : '' }}">
+            {{ rangeStart || '选择日期' }}
+          </view>
+        </picker>
+      </view>
+      <text class="range-sep">→</text>
+      <view class="range-item">
+        <text class="range-label">结束日期</text>
+        <picker mode="date" value="{{ rangeEnd }}" bindchange="onRangeEndChange">
+          <view class="range-picker {{ rangeEnd ? 'filled' : '' }}">
+            {{ rangeEnd || '选择日期' }}
+          </view>
+        </picker>
+      </view>
+    </view>
+
+    <view class="submit-btn {{ queryingRange ? 'btn-disabled' : '' }}" bindtap="queryRange">
+      <text>{{ queryingRange ? '查询中…' : '🔍 查询区间统计' }}</text>
+    </view>
+
+    <view wx:if="{{ rangeResult }}" class="range-result">
+      <view class="range-date-range">{{ rangeResultLabel }}</view>
+      <view class="range-kpi-row">
+        <view class="range-kpi">
+          <text class="range-kpi-val">{{ rangeResult.totalKwh }}</text>
+          <text class="range-kpi-label">总度数（度）</text>
+        </view>
+        <view class="range-kpi-divider"></view>
+        <view class="range-kpi">
+          <text class="range-kpi-val green">¥ {{ rangeResult.totalCost }}</text>
+          <text class="range-kpi-label">总电费（元）</text>
+        </view>
+        <view class="range-kpi-divider"></view>
+        <view class="range-kpi">
+          <text class="range-kpi-val">{{ rangeResult.days }}</text>
+          <text class="range-kpi-label">已结算天数</text>
+        </view>
+      </view>
+      <view class="range-divider"></view>
+      <view class="field-label" style="font-size:26rpx;">按人分摊合计</view>
+      <view wx:for="{{ rangeResult.persons }}" wx:key="name" class="record-row">
+        <view class="avatar">{{ item.name[0] }}</view>
+        <view class="record-info">
+          <text class="record-name">{{ item.name }}</text>
+          <text class="record-sub">折合 {{ item.kwh }} 度</text>
+        </view>
+        <text class="record-cost cost-ok">¥ {{ item.cost }}</text>
+      </view>
+    </view>
+
+    <view wx:elif="{{ rangeQueried && !rangeResult }}" class="empty-tip">
+      该区间暂无已结算数据
+    </view>
+  </view>
+
+</view>
